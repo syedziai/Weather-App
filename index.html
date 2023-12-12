@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', sans-serif;
+      box-sizing: border-box;
+      text-align: center;
+    }
+
+    body {
+      background-color: #222;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+      align-items: center;
+      flex-direction: column;
+      margin: 0 30px;
+      width: 500px;
+    }
+
+    .card {
+      width: 100%;
+      /* text-align: center; */
+      border-radius: 30px;
+      background: linear-gradient(135deg, #94bbe9, #eeaeca, #94bbe9);
+    }
+
+    .search {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      margin: 10px 10px;
+    }
+
+    .search input {
+      height: 50px;
+      border: 0;
+      outline: 0;
+      border-radius: 30px;
+      flex: 1;
+      margin-right: 16px;
+      font-size: 18px;
+      background: #ebfffc;
+      color: #555;
+
+    }
+
+    .search button {
+      border: 0;
+      outline: 0;
+      background: #ebfffc;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      cursor: pointer;
+    }
+
+    .search button img {
+      width: 20px;
+    }
+
+    .error {
+      display: none;
+    }
+
+    .error p {
+      text-align: left;
+      margin-left: 30px;
+      color: red;
+    }
+
+    .card-body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      display: none;
+    }
+
+    .city-details {
+      font-size: 25px;
+      font-weight: 800;
+    }
+
+    .weather-temp-details,
+    .weather-wind-details,
+    .weather-humid-details {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .weather-temp-details h2 {
+      margin-right: 20px;
+    }
+  </style>
+  <title>Weather App</title>
+</head>
+
+<body>
+
+  <div class="container">
+    <h1>Weather App</h1>
+    <div class="card">
+      <div class="card-top">
+        <div class="search">
+          <input type="text" placeholder="Enter city name" spellcheck="false">
+          <button><img src="./weather-app-assets/search.png" alt=""></button>
+        </div>
+      </div>
+      <div class="error">
+        <p>Invalid City</p>
+      </div>
+      <div class="card-body">
+        <div class="city">
+          <p class="city-details">Bangalore</p>
+        </div>
+        <div class="weather-img">
+          <img class="weatherIcon" src="./weather-app-assets/rain.png" alt="weather-image">
+        </div>
+        <div class="weather-details">
+          <div class="weather-temp-details">
+            <h2>Temperature</h2>
+            <p class="temp-details">26°</p>
+          </div>
+          <div class="weather-humid-details">
+            <h2>Humidity</h2>
+            <p class="humid-details">26°</p>
+          </div>
+          <div class="weather-wind-details">
+            <h2>Wind</h2>
+            <p class="wind-details">26°</p>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+
+  <script>
+    const apiKey = 'c5bc3be5b260ae84aca43a5ff09642fa'
+    const apiUrl = 'https://api.openweathermap.org/data/2.5/weather?units=metric&q='
+
+    const cityName = document.querySelector('.search input')
+    const searchBtn = document.querySelector('.search button')
+    const errorMessage = document.querySelector('.error');
+    const cardBody = document.querySelector('.card-body');
+
+    const weatherIcon = document.querySelector('.weatherIcon');
+
+
+    //asynchronous function to check wheather
+    async function checkWeather(city) {
+
+      //await to fetch the url and store resonse
+      const response = await fetch(apiUrl + city + `&appid=${apiKey}`)
+      console.log(response)
+
+      try {
+        if (response.status == 404) {
+          document.querySelector('.error').style.display = 'flex';
+          cardBody.style.display = 'none'
+        } else {
+          let data = await response.json();
+          console.log(data)
+
+          document.querySelector('.city-details').innerHTML = data.name;
+          document.querySelector('.temp-details').innerHTML = Math.round(data.main.temp) + "°C";
+          document.querySelector('.humid-details').innerHTML = data.main.humidity + "%";
+          document.querySelector('.wind-details').innerHTML = data.wind.speed + " km/h";
+
+          if (data.weather[0].main === 'Clouds') {
+            weatherIcon.src = "./weather-app-assets/clouds.png"
+          }
+          else if (data.weather[0].main === 'Clear') {
+            weatherIcon.src = "./weather-app-assets/clear.png"
+          }
+          else if (data.weather[0].main === 'Rain') {
+            weatherIcon.src = "./weather-app-assets/rain.png"
+          }
+          else if (data.weather[0].main === 'Drizzle') {
+            weatherIcon.src = "./weather-app-assets/drizzle.png"
+          }
+          else if (data.weather[0].main === 'Mist') {
+            weatherIcon.src = "./weather-app-assets/mist.png"
+          }
+          else if (data.weather[0].main === 'Snow') {
+            weatherIcon.src = "./weather-app-assets/snow.png"
+          }
+
+          cardBody.style.display = "inline-flex"
+          errorMessage.style.display = 'none';
+        }
+      }
+      catch (error) {
+        console.log(error)
+      }
+
+
+
+
+    }
+
+    searchBtn.addEventListener("click", () => {
+
+      checkWeather(cityName.value)
+      cityName.value = ''
+    })
+
+    cityName.addEventListener('keydown', function (event) {
+      // Check if the pressed key is Enter (key code 13)
+
+      if (event.key === 'Enter') {
+        // Trigger the same functionality as the click event
+        checkWeather(cityName.value)
+        cityName.value = ''
+      }
+    });
+
+
+
+
+
+
+
+
+
+  </script>
+
+</body>
+
+</html>
